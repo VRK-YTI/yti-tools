@@ -1,6 +1,7 @@
 package fi.vm.yti.localecreator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -19,20 +20,32 @@ public class LocaleMerger {
         Locale locSv = new Locale(LOCALE_SV);
         Locale locEn = new Locale(LOCALE_EN);
 
-        Locale[] availableLocales = Locale.getAvailableLocales();
-        try {
-            for (Locale loc : availableLocales) {
-                LocaleCode localeCode = new LocaleCode();
+        List<Locale> availableLocales = Arrays.asList(Locale.getAvailableLocales());
+        List<String> isoLangs = Arrays.asList(Locale.getISOLanguages());
 
+        availableLocales.forEach(loc -> {
+            LocaleCode localeCode = new LocaleCode();
+            localeCode.setLangLocale(loc.toLanguageTag());
+            localeCode.setTransFi(loc.getDisplayName(locFi));
+            localeCode.setTransSv(loc.getDisplayName(locSv));
+            localeCode.setTransEn(loc.getDisplayName(locEn));
+            localeCodes.add(localeCode);
+        });
+
+        /* Also check if there are ISO languages that are not available as Locales */
+        isoLangs.forEach(lang -> {
+            Locale loc = Locale.forLanguageTag(lang);
+            if (!availableLocales.contains(loc)) {
+                LocaleCode localeCode = new LocaleCode();
                 localeCode.setLangLocale(loc.toLanguageTag());
                 localeCode.setTransFi(loc.getDisplayName(locFi));
                 localeCode.setTransSv(loc.getDisplayName(locSv));
                 localeCode.setTransEn(loc.getDisplayName(locEn));
                 localeCodes.add(localeCode);
             }
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+        });
+
+        System.out.println("Size: " + localeCodes.size());
 
         return localeCodes;
     }
